@@ -19,10 +19,11 @@ public class TestController {
      * 直接注入定义的接口
      */
     @Autowired
-    IUserApi userApi;
+    private IUserApi userApi;
 
     @GetMapping("/")
     public void test() {
+        // 测试信息提取，不订阅，不会实际发出请求，但会进入我们的代理类
         userApi.getAllUser();
         userApi.getUserById("111111");
         userApi.deleteUserById("222222");

@@ -37,7 +37,7 @@ public class JdkProxyCreator implements ProxyCreator {
         log.info("serverInfo:" + serverInfo);
         // 每一个代理类一个实现
         RestHandler restHandler = new WebClientRestHandler();
-
+        // 初始化服务器信息(初始化webclient)
         restHandler.init(serverInfo);
 
         return Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[]{type}, new InvocationHandler() {
@@ -58,6 +58,39 @@ public class JdkProxyCreator implements ProxyCreator {
              */
             private MethodInfo extractMethodInfo(Method method, Object[] args) {
                 MethodInfo methodInfo = new MethodInfo();
+                extractMethodAndUrl(method, methodInfo);
+                extractParamsAndBody(method, args, methodInfo);
+                return methodInfo;
+            }
+            /**
+             * 得到MethodInfo的params和body
+             *
+             * @param method
+             * @param args
+             * @param methodInfo
+             */
+            private void extractParamsAndBody(Method method, Object[] args, MethodInfo methodInfo) {
+                Parameter[] parameters = method.getParameters();
+                Map<String, Object> params = new LinkedHashMap<>();
+                methodInfo.setParams(params);
+                for (int i = 0; i < parameters.length; i++) {
+                    PathVariable annoPath = parameters[i].getAnnotation(PathVariable.class);
+                    if (annoPath != null) {
+                        params.put(annoPath.value(), args[i]);
+                    }
+                    RequestBody annoBody = parameters[i].getAnnotation(RequestBody.class);
+                    if (annoBody != null) {
+                        methodInfo.setBody((Mono<?>)args[i]);
+                    }
+                }
+            }
+            /**
+             * 得到MethodInfo的url和method
+             *
+             * @param method
+             * @param methodInfo
+             */
+            private void extractMethodAndUrl(Method method, MethodInfo methodInfo) {
                 Annotation[] annotations = method.getAnnotations();
                 for (Annotation annotation : annotations) {
                     if (annotation instanceof GetMapping) {
@@ -74,21 +107,6 @@ public class JdkProxyCreator implements ProxyCreator {
                         methodInfo.setMethod(HttpMethod.DELETE);
                     }
                 }
-
-                Parameter[] parameters = method.getParameters();
-                Map<String, Object> params = new LinkedHashMap<>();
-                methodInfo.setParams(params);
-                for (int i = 0; i < parameters.length; i++) {
-                    PathVariable annoPath = parameters[i].getAnnotation(PathVariable.class);
-                    if (annoPath != null) {
-                        params.put(annoPath.value(), args[i]);
-                    }
-                    RequestBody annoBody = parameters[i].getAnnotation(RequestBody.class);
-                    if (annoBody != null) {
-                        methodInfo.setBody((Mono<?>)args[i]);
-                    }
-                }
-                return methodInfo;
             }
         });
     }
