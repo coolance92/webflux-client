@@ -36,11 +36,17 @@ public class WebClientRestHandler implements RestHandler {
     public Object invokeRest(MethodInfo methodInfo) {
         Object result = null;
 
-        WebClient.ResponseSpec retrieve = this.webClient
+        WebClient.RequestBodySpec accept = this.webClient
                 .method(methodInfo.getMethod())
                 .uri(methodInfo.getUri(), methodInfo.getParams())
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve();
+                .accept(MediaType.APPLICATION_JSON);
+        WebClient.ResponseSpec retrieve = null;
+        if (methodInfo.getBody() != null) {
+            retrieve = accept.body(methodInfo.getBody(), methodInfo.getBodyElementType()).retrieve();
+        } else {
+            retrieve = accept.retrieve();
+        }
+
         if (methodInfo.isFlag()) {
             result = retrieve.bodyToFlux(methodInfo.getReturnElementType());
         } else {

@@ -36,7 +36,11 @@ public class MethodInfo {
     /**
      * 请求body
      */
-    private Mono<?> body;
+    private Mono body;
+    /**
+     * 请求body的类型
+     */
+    private Class<?> bodyElementType;
     /**
      * 返回是Flux还是Mono，true：Flux；false：Mono
      */

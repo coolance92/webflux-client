@@ -30,8 +30,8 @@ public class TestController {
 //        userApi.createUser(Mono.just(User.builder().name("coolance").age(28).build()));
 
         //直接调用调用 实现调用rest接口的效果
-        Flux<User> users = userApi.getAllUser();
-        users.subscribe(System.out::println);
+//        Flux<User> users = userApi.getAllUser();
+//        users.subscribe(System.out::println);
 //        String id = "5da3c8eef182d10fd05281b0";
 //        userApi.getUserById(id).subscribe(user -> {
 //            System.out.println("找到用户:" + user);
@@ -40,5 +40,8 @@ public class TestController {
 //        });
 //
 //        userApi.deleteUserById(id).subscribe();
+        // 创建用户
+        userApi.createUser(Mono.just(User.builder().name("山伯").age(28).build()))
+                .subscribe(System.out::println);
     }
 }
