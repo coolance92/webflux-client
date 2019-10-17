@@ -21,8 +21,28 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MethodInfo {
-    private String url;
+    /**
+     * 请求uri
+     */
+    private String uri;
+    /**
+     * 请求方法
+     */
     private HttpMethod method;
+    /**
+     * url上的请求参数
+     */
     private Map<String, Object> params;
+    /**
+     * 请求body
+     */
     private Mono<?> body;
+    /**
+     * 返回是Flux还是Mono，true：Flux；false：Mono
+     */
+    private boolean flag;
+    /**
+     * 返回结果泛型参数的类型
+     */
+    private Class<?> returnElementType;
 }

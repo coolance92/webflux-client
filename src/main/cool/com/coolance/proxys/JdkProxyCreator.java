@@ -9,13 +9,11 @@ import com.coolance.interfaces.RestHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.lang.reflect.Proxy;
+import java.lang.reflect.*;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -60,8 +58,37 @@ public class JdkProxyCreator implements ProxyCreator {
                 MethodInfo methodInfo = new MethodInfo();
                 extractMethodAndUrl(method, methodInfo);
                 extractParamsAndBody(method, args, methodInfo);
+                extractReturnInfo(method, methodInfo);
                 return methodInfo;
             }
+
+            /**
+             * 提取返回对象信息
+             *
+             * @param method
+             * @param methodInfo
+             */
+            private void extractReturnInfo(Method method, MethodInfo methodInfo) {
+                // 返回flux还是mono，isAssignableFrom 判断类型是否某个的子类，instanceof 判断实例是否某个的子类
+                boolean flag = method.getReturnType().isAssignableFrom(Flux.class);
+                methodInfo.setFlag(flag);
+
+                // 得到返回对象的实际类型
+                Class<?> elementType = extractElementType(method.getGenericReturnType());
+                methodInfo.setReturnElementType(elementType);
+            }
+
+            /**
+             * 得到泛型类型的实际类型
+             *
+             * @param genericReturnType
+             * @return
+             */
+            private Class<?> extractElementType(Type genericReturnType) {
+                Type[] actualTypeArguments = ((ParameterizedType) genericReturnType).getActualTypeArguments();
+                return (Class<?>) actualTypeArguments[0];
+            }
+
             /**
              * 得到MethodInfo的params和body
              *
@@ -80,10 +107,11 @@ public class JdkProxyCreator implements ProxyCreator {
                     }
                     RequestBody annoBody = parameters[i].getAnnotation(RequestBody.class);
                     if (annoBody != null) {
-                        methodInfo.setBody((Mono<?>)args[i]);
+                        methodInfo.setBody((Mono<?>) args[i]);
                     }
                 }
             }
+
             /**
              * 得到MethodInfo的url和method
              *
@@ -94,16 +122,16 @@ public class JdkProxyCreator implements ProxyCreator {
                 Annotation[] annotations = method.getAnnotations();
                 for (Annotation annotation : annotations) {
                     if (annotation instanceof GetMapping) {
-                        methodInfo.setUrl(((GetMapping) annotation).value()[0]);
+                        methodInfo.setUri(((GetMapping) annotation).value()[0]);
                         methodInfo.setMethod(HttpMethod.GET);
                     } else if (annotation instanceof PostMapping) {
-                        methodInfo.setUrl(((PostMapping) annotation).value()[0]);
+                        methodInfo.setUri(((PostMapping) annotation).value()[0]);
                         methodInfo.setMethod(HttpMethod.POST);
                     } else if (annotation instanceof PutMapping) {
-                        methodInfo.setUrl(((PutMapping) annotation).value()[0]);
+                        methodInfo.setUri(((PutMapping) annotation).value()[0]);
                         methodInfo.setMethod(HttpMethod.PUT);
                     } else if (annotation instanceof DeleteMapping) {
-                        methodInfo.setUrl(((DeleteMapping) annotation).value()[0]);
+                        methodInfo.setUri(((DeleteMapping) annotation).value()[0]);
                         methodInfo.setMethod(HttpMethod.DELETE);
                     }
                 }

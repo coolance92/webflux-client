@@ -24,13 +24,21 @@ public class TestController {
     @GetMapping("/")
     public void test() {
         // 测试信息提取，不订阅，不会实际发出请求，但会进入我们的代理类
-        userApi.getAllUser();
-        userApi.getUserById("111111");
-        userApi.deleteUserById("222222");
-        userApi.createUser(Mono.just(User.builder().name("coolance").age(28).build()));
+//        userApi.getAllUser();
+//        userApi.getUserById("111111");
+//        userApi.deleteUserById("222222");
+//        userApi.createUser(Mono.just(User.builder().name("coolance").age(28).build()));
 
         //直接调用调用 实现调用rest接口的效果
-//        Flux<User> users = userApi.getAllUser();
-//        users.subscribe(System.out::println);
+        Flux<User> users = userApi.getAllUser();
+        users.subscribe(System.out::println);
+//        String id = "5da3c8eef182d10fd05281b0";
+//        userApi.getUserById(id).subscribe(user -> {
+//            System.out.println("找到用户:" + user);
+//        }, e -> {
+//            System.err.println("找不到用户:" + e.getMessage());
+//        });
+//
+//        userApi.deleteUserById(id).subscribe();
     }
 }
