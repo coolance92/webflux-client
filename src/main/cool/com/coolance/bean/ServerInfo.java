@@ -1,7 +1,9 @@
 package com.coolance.bean;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @ClassName ServerInfo
@@ -12,6 +14,9 @@ import lombok.Data;
  */
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ServerInfo {
+
     private String url;
 }

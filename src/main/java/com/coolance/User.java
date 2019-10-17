@@ -1,6 +1,9 @@
 package com.coolance;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @ClassName User
@@ -10,6 +13,9 @@ import lombok.Data;
  * @Date 2019/10/13 14:33
  */
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
     private String id;
     private String name;
