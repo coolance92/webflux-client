@@ -5,6 +5,7 @@ import com.coolance.bean.ServerInfo;
 import com.coolance.interfaces.RestHandler;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 /**
  * @ClassName WebClientRestHandler
@@ -46,6 +47,10 @@ public class WebClientRestHandler implements RestHandler {
         } else {
             retrieve = accept.retrieve();
         }
+
+        // 处理异常
+        retrieve.onStatus(status -> status.value() == 404,
+                response -> Mono.just(new RuntimeException("Not Found")));
 
         if (methodInfo.isFlag()) {
             result = retrieve.bodyToFlux(methodInfo.getReturnElementType());
